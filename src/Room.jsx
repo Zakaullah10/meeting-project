@@ -388,15 +388,15 @@ export const Room = () => {
     return `${src.id.slice(0, 8)}… track:${t?.readyState ?? "none"}`;
   };
 
-  useEffect(() => {
-  socketRef.current = io("http://localhost:8000", {
-    transports: ["websocket"],
-  });
+//   useEffect(() => {
+//   socketRef.current = io("http://localhost:8000", {
+//     transports: ["websocket"],
+//   });
 
-  return () => {
-    socketRef.current.disconnect();
-  };
-}, []);
+//   return () => {
+//     socketRef.current.disconnect();
+//   };
+// }, []);
 
   useEffect(() => {
     if (screenSharing) {
