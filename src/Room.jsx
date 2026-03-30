@@ -1051,175 +1051,11 @@ import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useParams } from "react-router-dom";
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-const MicOnIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-    strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" />
-  </svg>
-);
-const MicOffIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-    strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-    <line x1="1" y1="1" x2="23" y2="23" />
-    <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
-    <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23M12 19v4M8 23h8" />
-  </svg>
-);
-const CamOnIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-    strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-    <polygon points="23 7 16 12 23 17 23 7" />
-    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-  </svg>
-);
-const CamOffIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-    strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-    <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10" />
-    <line x1="1" y1="1" x2="23" y2="23" />
-  </svg>
-);
-const ScreenShareIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-    strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-    <rect x="2" y="3" width="20" height="14" rx="2" />
-    <path d="M8 21h8M12 17v4" />
-    <polyline points="8 9 12 5 16 9" />
-    <line x1="12" y1="5" x2="12" y2="14" />
-  </svg>
-);
-const StopShareIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-    strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-    <rect x="2" y="3" width="20" height="14" rx="2" />
-    <path d="M8 21h8M12 17v4" />
-    <line x1="1" y1="1" x2="23" y2="23" />
-  </svg>
-);
-const LeaveIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-    strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-    <polyline points="16 17 21 12 16 7" />
-    <line x1="21" y1="12" x2="9" y2="12" />
-  </svg>
-);
-const BrowserMicIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-    strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" />
-  </svg>
-);
-const BrowserCamIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-    strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-    <polygon points="23 7 16 12 23 17 23 7" />
-    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-  </svg>
-);
-const CloseIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-    strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-const ArrowRightIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-    strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
-    <line x1="5" y1="12" x2="19" y2="12" />
-    <polyline points="12 5 19 12 12 19" />
-  </svg>
-);
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0a0c10; --surface: rgba(255,255,255,0.04); --surface-hover: rgba(255,255,255,0.07);
-    --border: rgba(255,255,255,0.08); --text: #e8eaf0; --text-muted: #6b7280;
-    --accent: #6366f1; --accent-glow: rgba(99,102,241,0.35); --danger: #ef4444;
-    --danger-glow: rgba(239,68,68,0.35); --success: #10b981; --success-glow: rgba(16,185,129,0.3);
-  }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
-  .room-wrapper { height: 100vh; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; position: relative; }
-  .room-wrapper::before { content: ''; position: fixed; top: -200px; left: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; animation: driftA 18s ease-in-out infinite alternate; }
-  .room-wrapper::after { content: ''; position: fixed; bottom: -200px; right: -200px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%); border-radius: 50%; pointer-events: none; animation: driftB 22s ease-in-out infinite alternate; }
-  @keyframes driftA { to { transform: translate(60px, 80px); } }
-  @keyframes driftB { to { transform: translate(-60px, -60px); } }
-  .room-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); background: rgba(10,12,16,0.8); backdrop-filter: blur(20px); position: relative; z-index: 10; flex-shrink: 0; }
-  .room-logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; letter-spacing: -0.3px; }
-  .room-logo-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success-glow); animation: blink 2s ease-in-out infinite; }
-  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-  .room-id { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px; }
-  .room-participants span { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 500; color: var(--text); }
-  .presenting-badge { display: flex; align-items: center; gap: 6px; position: absolute; top: 14px; left: 50%; transform: translateX(-50%); background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 20px; }
-  .presenting-dot { width: 6px; height: 6px; background: var(--danger); border-radius: 50%; animation: blink 1.2s ease-in-out infinite; }
-  .video-area { flex: 1; display: flex; overflow: hidden; padding: 20px; gap: 16px; position: relative; z-index: 1; }
-  .video-grid { display: grid; width: 100%; gap: 12px; align-content: center; justify-items: center; }
-  .video-grid.count-1 { grid-template-columns: 1fr; max-width: 760px; margin: 0 auto; }
-  .video-grid.count-2 { grid-template-columns: 1fr 1fr; }
-  .video-grid.count-3, .video-grid.count-4 { grid-template-columns: 1fr 1fr; }
-  .video-grid.count-5, .video-grid.count-6 { grid-template-columns: repeat(3, 1fr); }
-  .screenshare-layout { display: flex; gap: 12px; width: 100%; height: 100%; }
-  .screenshare-main { flex: 1; border-radius: 16px; overflow: hidden; background: #000; border: 1px solid var(--border); }
-  .screenshare-main video { width: 100%; height: 100%; object-fit: contain; }
-  .screenshare-sidebar { width: 220px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
-  .video-tile { position: relative; width: 100%; border-radius: 16px; overflow: hidden; background: #0d0f14; border: 1px solid var(--border); aspect-ratio: 16/9; animation: tileIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
-  @keyframes tileIn { from { opacity:0; transform: scale(0.92); } to { opacity:1; transform: scale(1); } }
-  .video-tile:hover { border-color: rgba(255,255,255,0.15); }
-  .video-tile-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%); padding: 10px 12px; pointer-events: none; }
-  .video-tile-name { font-size: 12px; font-weight: 500; color: #fff; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); padding: 3px 9px; border-radius: 20px; }
-  .video-avatar { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1d26, #0f111a); }
-  .avatar-circle { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 600; color: #fff; }
-  .avatar-circle.remote { background: linear-gradient(135deg, #10b981, #06b6d4); }
-  .conn-badge { position: absolute; top: 8px; right: 8px; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
-  .conn-badge.connecting { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
-  .conn-badge.connected { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-  .conn-badge.failed { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-  .controls-bar { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 24px; background: rgba(10,12,16,0.85); backdrop-filter: blur(20px); border-top: 1px solid var(--border); flex-shrink: 0; position: relative; z-index: 10; }
-  .ctrl-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 12px 20px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: all 0.18s ease; font-size: 11px; font-weight: 500; font-family: 'DM Sans', sans-serif; letter-spacing: 0.3px; min-width: 72px; }
-  .ctrl-btn:hover { background: var(--surface-hover); transform: translateY(-1px); }
-  .ctrl-btn.muted { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
-  .ctrl-btn.sharing { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #fbbf24; }
-  .ctrl-btn.leave { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.25); color: #f87171; margin-left: 16px; }
-  .ctrl-btn.leave:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
-  .ctrl-divider { width: 1px; height: 48px; background: var(--border); margin: 0 6px; }
-  .sidebar-tile { border-radius: 12px; overflow: hidden; position: relative; background: #0d0f14; border: 1px solid var(--border); aspect-ratio: 16/9; flex-shrink: 0; }
-  .sidebar-tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .sidebar-tile-name { position: absolute; bottom: 6px; left: 8px; font-size: 11px; font-weight: 500; color: #fff; background: rgba(0,0,0,0.5); padding: 2px 7px; border-radius: 10px; }
-  .perm-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(5,6,10,0.75); backdrop-filter: blur(12px); }
-  .perm-modal { width: 420px; background: #12141c; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.6); animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
-  @keyframes modalIn { from { opacity:0; transform: scale(0.9) translateY(16px); } to { opacity:1; transform: scale(1) translateY(0); } }
-  .perm-modal-header { padding: 28px 28px 0; display: flex; align-items: flex-start; justify-content: space-between; }
-  .perm-icon-wrap { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; position: relative; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25); color: #f87171; }
-  .perm-icon-badge { position: absolute; bottom: -4px; right: -4px; width: 18px; height: 18px; background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; border: 2px solid #12141c; }
-  .perm-close-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-  .perm-modal-body { padding: 20px 28px 28px; }
-  .perm-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-  .perm-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
-  .perm-desc strong { color: #a5b4fc; font-weight: 500; }
-  .perm-steps { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
-  .perm-step { display: flex; align-items: center; gap: 12px; }
-  .perm-step-num { width: 24px; height: 24px; border-radius: 8px; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .perm-step-text { font-size: 13px; color: var(--text); line-height: 1.45; }
-  .perm-actions { display: flex; gap: 10px; }
-  .perm-btn-retry { flex: 1; padding: 12px; border-radius: 12px; background: var(--accent); border: none; color: #fff; font-size: 13.5px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; }
-  .perm-btn-retry:hover { background: #4f52d9; }
-  .perm-btn-dismiss { padding: 12px 18px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-  .perm-footer-note { margin-top: 14px; text-align: center; font-size: 11.5px; color: var(--text-muted); }
-`;
-
-// ─── ICE Servers (STUN + TURN for NAT traversal) ──────────────────────────────
+// ─── ICE Servers ──────────────────────────────────────────────────────────────
 const ICE_CONFIG = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
-    { urls: "stun:stun2.l.google.com:19302" },
     {
       urls: "turn:openrelay.metered.ca:80",
       username: "openrelayproject",
@@ -1233,73 +1069,27 @@ const ICE_CONFIG = {
   ],
 };
 
-// ─── Permission Modal ─────────────────────────────────────────────────────────
-const PermissionModal = ({ type, onClose, onRetry }) => {
-  const isMic = type === "mic";
-  const handleRetry = async () => {
-    try {
-      await navigator.mediaDevices.getUserMedia(isMic ? { audio: true } : { video: true });
-      onRetry();
-    } catch {}
-  };
-  return (
-    <div className="perm-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="perm-modal">
-        <div className="perm-modal-header">
-          <div className="perm-icon-wrap">
-            {isMic ? <BrowserMicIcon /> : <BrowserCamIcon />}
-            <div className="perm-icon-badge">!</div>
-          </div>
-          <button className="perm-close-btn" onClick={onClose}><CloseIcon /></button>
-        </div>
-        <div className="perm-modal-body">
-          <div className="perm-title">{isMic ? "Microphone" : "Camera"} Access Blocked</div>
-          <div className="perm-desc">
-            MeetSpace needs your <strong>{isMic ? "microphone" : "camera"}</strong> to connect.
-          </div>
-          <div className="perm-steps">
-            {[
-              "Click 🔒 Lock in address bar",
-              `Change ${isMic ? "Microphone" : "Camera"} to Allow`,
-              "Click Request Again below",
-            ].map((text, i) => (
-              <div className="perm-step" key={i}>
-                <div className="perm-step-num">{i + 1}</div>
-                <div className="perm-step-text">{text}</div>
-              </div>
-            ))}
-          </div>
-          <div className="perm-actions">
-            <button className="perm-btn-retry" onClick={handleRetry}>Request Again <ArrowRightIcon /></button>
-            <button className="perm-btn-dismiss" onClick={onClose}>Dismiss</button>
-          </div>
-          <div className="perm-footer-note">Reload page after updating browser permissions.</div>
-        </div>
-      </div>
-    </div>
-  );
-};
+// ─── Socket singleton ─────────────────────────────────────────────────────────
+const socket = io("https://meeting-project-be-production.up.railway.app", {
+  transports: ["websocket", "polling"],
+  reconnectionAttempts: 5,
+});
 
-// ─── Remote Video Tile ────────────────────────────────────────────────────────
-// Uses a stable ref so peer.on("stream") can always find the <video> element
-const RemoteVideoTile = React.memo(({ user }) => {
-  const videoElRef = useRef(null);
-  const [hasStream, setHasStream] = useState(false);
+// ─── Remote Audio tile ────────────────────────────────────────────────────────
+const RemoteAudioTile = React.memo(({ user }) => {
+  const audioRef = useRef(null);
   const [status, setStatus] = useState("connecting");
 
-  // Register callbacks on user object so peer events can update the tile
   useEffect(() => {
     user._onStream = (remoteStream) => {
-      if (videoElRef.current) {
-        videoElRef.current.srcObject = remoteStream;
-        videoElRef.current.play().catch(() => {});
+      if (audioRef.current) {
+        audioRef.current.srcObject = remoteStream;
+        audioRef.current.play().catch(() => {});
       }
-      setHasStream(true);
       setStatus("connected");
     };
     user._setStatus = (s) => setStatus(s);
 
-    // In case stream arrived before this component mounted
     if (user._pendingStream) {
       user._onStream(user._pendingStream);
       user._pendingStream = null;
@@ -1312,110 +1102,29 @@ const RemoteVideoTile = React.memo(({ user }) => {
   }, [user]);
 
   return (
-    <div className="video-tile">
-      <video
-        ref={videoElRef}
-        autoPlay
-        playsInline
-        style={{
-          width: "100%", height: "100%", objectFit: "cover",
-          display: hasStream ? "block" : "none",
-        }}
-      />
-      {!hasStream && (
-        <div className="video-avatar">
-          <div className="avatar-circle remote">
-            {(user.name || "U")[0].toUpperCase()}
-          </div>
-        </div>
-      )}
-      <span className={`conn-badge ${status}`}>
-        {status === "connecting" ? "Connecting…" : status === "connected" ? "Live" : "Failed"}
-      </span>
-      <div className="video-tile-overlay">
-        <span className="video-tile-name">{user.name || "User"}</span>
-      </div>
+    <div>
+      {/* Hidden audio element — plays remote user's voice */}
+      <audio ref={audioRef} autoPlay playsInline />
+      <p>
+        {user.name || "User"} — {status}
+      </p>
     </div>
   );
-});
-
-// ─── Socket singleton (module-level, persists across renders) ─────────────────
-const socket = io("https://meeting-project-be-production.up.railway.app", {
-  transports: ["websocket", "polling"],
-  reconnectionAttempts: 5,
 });
 
 // ─── Room ─────────────────────────────────────────────────────────────────────
 export const Room = () => {
   const { id } = useParams();
 
-  const [users, setUsers]             = useState([]);
-  const [micOn, setMicOn]             = useState(false);  // ✅ default OFF until permission confirmed
-  const [videoOn, setVideoOn]         = useState(false);  // ✅ default OFF until permission confirmed
-  const [screenSharing, setScreenSharing] = useState(false);
-  const [micBlocked, setMicBlocked]   = useState(false);
-  const [camBlocked, setCamBlocked]   = useState(false);
-  const [permModal, setPermModal]     = useState(null);
+  const [users, setUsers]   = useState([]);
+  const [micOn, setMicOn]   = useState(false);
+  const [error, setError]   = useState(null);
 
-  const streamRef       = useRef(null);  // live MediaStream — always current
-  const peersRef        = useRef([]);    // [{ peerID: string, peer: Peer }]
-  const gridVideoRef    = useRef(null);
-  const sidebarVideoRef = useRef(null);
-  const screenVideoRef  = useRef(null);
-  const pendingScreenRef = useRef(null);
-  const pendingCamRef   = useRef(null);
-  const canvasRef       = useRef(null);
+  const streamRef  = useRef(null);
+  const peersRef   = useRef([]);
 
-  // ── Style injection ──────────────────────────────────────────────────────
-  useEffect(() => {
-    const el = document.createElement("style");
-    el.textContent = styles;
-    document.head.appendChild(el);
-    return () => document.head.removeChild(el);
-  }, []);
-
-  // ── screenshare: reassign video elements when layout switches ────────────
-  useEffect(() => {
-    if (screenSharing) {
-      if (screenVideoRef.current && pendingScreenRef.current) {
-        screenVideoRef.current.srcObject = pendingScreenRef.current;
-        screenVideoRef.current.play().catch(() => {});
-      }
-      if (sidebarVideoRef.current && pendingCamRef.current) {
-        sidebarVideoRef.current.srcObject = pendingCamRef.current;
-        sidebarVideoRef.current.play().catch(() => {});
-      }
-    } else {
-      if (gridVideoRef.current && streamRef.current) {
-        gridVideoRef.current.srcObject = streamRef.current;
-        gridVideoRef.current.play().catch(() => {});
-      }
-    }
-  }, [screenSharing]);
-
-  // ── Silent/black fallback when all media is blocked ──────────────────────
-  const createSilentStream = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 2; canvas.height = 2;
-    canvas.getContext("2d").fillRect(0, 0, 2, 2);
-    const videoTrack = canvas.captureStream(1).getVideoTracks()[0];
-    videoTrack.enabled = false;
-    try {
-      const ac = new AudioContext();
-      const dst = ac.createMediaStreamDestination();
-      const audioTrack = dst.stream.getAudioTracks()[0];
-      if (audioTrack) { audioTrack.enabled = false; return new MediaStream([videoTrack, audioTrack]); }
-    } catch {}
-    return new MediaStream([videoTrack]);
-  };
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // ✅ CORE FIX: makePeer always reads streamRef.current at the moment it's
-  //    called — never a stale closure value.
-  //    Also uses trickle: true for faster/more reliable connections.
-  // ─────────────────────────────────────────────────────────────────────────
+  // ── Make a peer connection ─────────────────────────────────────────────────
   const makePeer = useCallback((targetId, initiator, incomingSignal = null) => {
-    // ✅ Read the live stream from the ref at call time
     const liveStream = streamRef.current;
 
     console.log(
@@ -1425,19 +1134,18 @@ export const Room = () => {
 
     const peer = new Peer({
       initiator,
-      trickle: true,       // ✅ trickle ICE — faster, works behind most NATs
-      stream: liveStream,  // ✅ real live stream passed here
+      trickle: true,
+      stream: liveStream,
       config: ICE_CONFIG,
     });
 
-    // The user entry object we'll store + render
     const userEntry = {
       id: targetId,
       name: "User",
       isSelf: false,
-      _onStream: null,    // set by RemoteVideoTile once it mounts
-      _setStatus: null,   // set by RemoteVideoTile once it mounts
-      _pendingStream: null, // holds stream if tile not mounted yet
+      _onStream: null,
+      _setStatus: null,
+      _pendingStream: null,
     };
 
     peer.on("signal", (signal) => {
@@ -1449,12 +1157,10 @@ export const Room = () => {
     });
 
     peer.on("stream", (remoteStream) => {
-      console.log(`[PEER] ✅ Remote stream from ${targetId}:`, remoteStream.getTracks().map(t => t.kind));
+      console.log(`[PEER] ✅ Stream from ${targetId}`);
       if (userEntry._onStream) {
-        // Tile is mounted — hand it directly
         userEntry._onStream(remoteStream);
       } else {
-        // Tile not mounted yet — save for when it mounts
         userEntry._pendingStream = remoteStream;
       }
     });
@@ -1469,7 +1175,6 @@ export const Room = () => {
       if (userEntry._setStatus) userEntry._setStatus("failed");
     });
 
-    // Answerer must feed the incoming offer signal
     if (!initiator && incomingSignal) {
       peer.signal(incomingSignal);
     }
@@ -1477,72 +1182,40 @@ export const Room = () => {
     return { peer, userEntry };
   }, []);
 
-  // ─── Main setup ───────────────────────────────────────────────────────────
+  // ── Main setup ─────────────────────────────────────────────────────────────
   useEffect(() => {
     let disposed = false;
 
     const init = async () => {
-      // ── 1. Get media ──
-      let liveStream = null;
-      let micGranted = false;
-      let camGranted = false;
-
+      // 1. Get microphone only
       try {
-        liveStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        micGranted = true;
-        camGranted = true;
-        console.log("✅ Got camera + mic");
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        if (disposed) return;
+
+        streamRef.current = stream;
+        setMicOn(true);
+        console.log("✅ Microphone access granted");
       } catch (err) {
-        console.warn("⚠️ getUserMedia both failed:", err.name, "— trying individually");
-        const tracks = [];
-
-        try {
-          const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
-          ms.getAudioTracks().forEach(t => tracks.push(t));
-          micGranted = true;
-        } catch { console.warn("🚫 Mic blocked"); setMicBlocked(true); }
-
-        try {
-          const ms = await navigator.mediaDevices.getUserMedia({ video: true });
-          ms.getVideoTracks().forEach(t => tracks.push(t));
-          camGranted = true;
-        } catch { console.warn("🚫 Camera blocked"); setCamBlocked(true); }
-
-        liveStream = tracks.length ? new MediaStream(tracks) : createSilentStream();
+        console.error("🚫 Mic blocked:", err.name);
+        setError("Microphone access denied. Please allow mic and reload.");
+        // Use a silent stream so peers can still connect
+        const ac = new AudioContext();
+        const dst = ac.createMediaStreamDestination();
+        streamRef.current = dst.stream;
       }
 
       if (disposed) return;
 
-      // ── 2. Store stream ──
-      streamRef.current = liveStream;
-      pendingCamRef.current = liveStream;
+      // 2. Add self to list
+      setUsers([{ id: socket.id || "self", name: "You", isSelf: true }]);
 
-      // ── 3. Set UI state ──
-      setMicOn(micGranted);
-      setVideoOn(camGranted);
-
-      // ── 4. Show own video ──
-      if (gridVideoRef.current) {
-        gridVideoRef.current.srcObject = liveStream;
-        gridVideoRef.current.play().catch(() => {});
-      }
-
-      // ── 5. Add self to grid ──
-      setUsers([{
-        id: socket.id || "self",
-        name: "You",
-        isSelf: true,
-        videoOn: camGranted,
-      }]);
-
-      // ── 6. Register socket events ──
+      // 3. Socket events
       socket.off("all-users");
       socket.off("user-joined");
       socket.off("receiving-signal");
       socket.off("answer-signal");
       socket.off("user-left");
 
-      // People already in room
       socket.on("all-users", (ids) => {
         console.log("👥 Existing users:", ids);
         ids.forEach((uid) => {
@@ -1553,7 +1226,6 @@ export const Room = () => {
         });
       });
 
-      // New user joined after us
       socket.on("user-joined", (uid) => {
         console.log("➕ User joined:", uid);
         if (peersRef.current.find(p => p.peerID === uid)) return;
@@ -1562,28 +1234,21 @@ export const Room = () => {
         setUsers(prev => prev.find(u => u.id === uid) ? prev : [...prev, userEntry]);
       });
 
-      // Incoming offer from another peer
       socket.on("receiving-signal", ({ signal, from }) => {
         console.log("📡 Offer from:", from);
         const existing = peersRef.current.find(p => p.peerID === from);
-        if (existing) {
-          // Already have peer — feed signal
-          existing.peer.signal(signal);
-          return;
-        }
+        if (existing) { existing.peer.signal(signal); return; }
         const { peer, userEntry } = makePeer(from, false, signal);
         peersRef.current.push({ peerID: from, peer });
         setUsers(prev => prev.find(u => u.id === from) ? prev : [...prev, userEntry]);
       });
 
-      // Answer to our offer
       socket.on("answer-signal", ({ signal, from }) => {
         console.log("📩 Answer from:", from);
         const item = peersRef.current.find(p => p.peerID === from);
         if (item) item.peer.signal(signal);
       });
 
-      // User disconnected
       socket.on("user-left", (uid) => {
         console.log("❌ Left:", uid);
         const item = peersRef.current.find(p => p.peerID === uid);
@@ -1592,7 +1257,7 @@ export const Room = () => {
         setUsers(prev => prev.filter(u => u.id !== uid));
       });
 
-      // ── 7. Join room (safe: works whether socket is connected or not) ──
+      // 4. Join room
       const doJoin = () => {
         console.log("🔗 join-room:", id);
         socket.emit("join-room", id);
@@ -1615,280 +1280,42 @@ export const Room = () => {
     };
   }, [id, makePeer]);
 
-  // ─── Toggle mic ────────────────────────────────────────────────────────────
+  // ── Toggle mic ─────────────────────────────────────────────────────────────
   const toggleMic = () => {
-    if (micBlocked) { setPermModal("mic"); return; }
     const track = streamRef.current?.getAudioTracks()[0];
     if (!track) return;
-    const next = !micOn;
-    track.enabled = next;
-    setMicOn(next);
+    track.enabled = !micOn;
+    setMicOn(!micOn);
   };
 
-  // ─── Toggle camera ─────────────────────────────────────────────────────────
-  const toggleVideo = () => {
-    if (camBlocked) { setPermModal("cam"); return; }
-    const track = streamRef.current?.getVideoTracks()[0];
-    if (!track) return;
-    const next = !videoOn;
-    track.enabled = next;
-    setVideoOn(next);
-    setUsers(prev => prev.map(u => u.isSelf ? { ...u, videoOn: next } : u));
+  // ── Leave ──────────────────────────────────────────────────────────────────
+  const leaveRoom = () => {
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    window.location.href = "/";
   };
 
-  // ─── Permission retry ──────────────────────────────────────────────────────
-  const handlePermissionGranted = async () => {
-    setPermModal(null);
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      // Stop old tracks
-      streamRef.current?.getTracks().forEach(t => t.stop());
-      streamRef.current = s;
-      pendingCamRef.current = s;
-      setMicOn(true); setVideoOn(true);
-      setMicBlocked(false); setCamBlocked(false);
-      if (gridVideoRef.current) { gridVideoRef.current.srcObject = s; gridVideoRef.current.play().catch(() => {}); }
-      // Replace tracks in all existing peer connections
-      peersRef.current.forEach(({ peer }) => {
-        const pc = peer._pc;
-        if (!pc) return;
-        s.getTracks().forEach(newTrack => {
-          const sender = pc.getSenders().find(snd => snd.track?.kind === newTrack.kind);
-          if (sender) sender.replaceTrack(newTrack).catch(() => {});
-        });
-      });
-    } catch {}
-  };
-
-  // ─── Screen share start ────────────────────────────────────────────────────
-  const startScreenShare = async () => {
-    try {
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-      const camStream = streamRef.current;
-
-      const offCam = document.createElement("video");
-      offCam.srcObject = camStream; offCam.muted = true;
-      await offCam.play().catch(() => {});
-
-      const offScr = document.createElement("video");
-      offScr.srcObject = screenStream; offScr.muted = true;
-      await offScr.play().catch(() => {});
-
-      const canvas = document.createElement("canvas");
-      canvas.width = 1280; canvas.height = 720;
-      const ctx = canvas.getContext("2d");
-      let animId;
-      const draw = () => {
-        ctx.drawImage(offScr, 0, 0, 1280, 720);
-        if (videoOn) ctx.drawImage(offCam, 940, 530, 320, 180);
-        animId = requestAnimationFrame(draw);
-      };
-      draw();
-
-      const canvasStream = canvas.captureStream(30);
-      canvasRef.current = { canvasStream, animId, screenStream, offCam, offScr };
-
-      peersRef.current.forEach(({ peer }) => {
-        const sender = peer._pc?.getSenders().find(s => s.track?.kind === "video");
-        if (sender) sender.replaceTrack(canvasStream.getVideoTracks()[0]).catch(() => {});
-      });
-
-      pendingScreenRef.current = screenStream;
-      pendingCamRef.current = camStream;
-      screenStream.getVideoTracks()[0].onended = stopScreenShare;
-      setScreenSharing(true);
-    } catch (err) {
-      console.error("Screen share failed:", err);
-    }
-  };
-
-  // ─── Screen share stop ─────────────────────────────────────────────────────
-  const stopScreenShare = () => {
-    const ref = canvasRef.current;
-    if (ref?.animId) cancelAnimationFrame(ref.animId);
-    ref?.screenStream?.getTracks().forEach(t => t.stop());
-    if (ref?.offCam) ref.offCam.srcObject = null;
-    if (ref?.offScr) ref.offScr.srcObject = null;
-    canvasRef.current = null;
-    pendingScreenRef.current = null;
-    const camStream = streamRef.current;
-    if (camStream) {
-      peersRef.current.forEach(({ peer }) => {
-        const sender = peer._pc?.getSenders().find(s => s.track?.kind === "video");
-        if (sender) sender.replaceTrack(camStream.getVideoTracks()[0]).catch(() => {});
-      });
-    }
-    setScreenSharing(false);
-  };
-
-  // ─── Render ────────────────────────────────────────────────────────────────
-  const selfUser = users.find(u => u.isSelf);
+  // ── Render ─────────────────────────────────────────────────────────────────
   const remoteUsers = users.filter(u => !u.isSelf);
-  const count = Math.max(users.length, 1);
-  const gridClass = `video-grid count-${Math.min(count, 6)}`;
 
   return (
-    <div className="room-wrapper">
-      {permModal && (
-        <PermissionModal
-          type={permModal}
-          onClose={() => setPermModal(null)}
-          onRetry={handlePermissionGranted}
-        />
-      )}
+    <div>
+      <h2>Room: {id}</h2>
+      <p>Participants: {users.length}</p>
 
-      {/* Header */}
-      <header className="room-header">
-        <div className="room-logo">
-          <div className="room-logo-dot" />
-          MeetSpace
-        </div>
-        {screenSharing && (
-          <div className="presenting-badge">
-            <div className="presenting-dot" />
-            You are presenting
-          </div>
-        )}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div className="room-id">{id}</div>
-          <div className="room-participants">
-            <span>{users.length} {users.length === 1 ? "participant" : "participants"}</span>
-          </div>
-        </div>
-      </header>
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {/* Video Area */}
-      <div className="video-area">
-
-        {/* Screen share layout */}
-        {screenSharing && (
-          <div className="screenshare-layout">
-            <div className="screenshare-main">
-              <video
-                ref={el => {
-                  screenVideoRef.current = el;
-                  if (el && pendingScreenRef.current && !el.srcObject) {
-                    el.srcObject = pendingScreenRef.current;
-                    el.play().catch(() => {});
-                  }
-                }}
-                autoPlay muted playsInline
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            </div>
-            <div className="screenshare-sidebar">
-              {/* Self tile */}
-              <div className="sidebar-tile">
-                <video
-                  ref={el => {
-                    sidebarVideoRef.current = el;
-                    if (el && pendingCamRef.current && !el.srcObject) {
-                      el.srcObject = pendingCamRef.current;
-                      el.play().catch(() => {});
-                    }
-                  }}
-                  autoPlay muted playsInline
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: videoOn ? "block" : "none" }}
-                />
-                {!videoOn && <div className="video-avatar"><div className="avatar-circle">Y</div></div>}
-                <div className="sidebar-tile-name">You</div>
-              </div>
-              {/* Remote tiles */}
-              {remoteUsers.map(user => (
-                <div className="sidebar-tile" key={user.id}>
-                  <video
-                    ref={el => {
-                      if (el && user._pendingStream) {
-                        el.srcObject = user._pendingStream;
-                        el.play().catch(() => {});
-                        user._pendingStream = null;
-                      }
-                    }}
-                    autoPlay playsInline
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  />
-                  <div className="sidebar-tile-name">{user.name}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Normal grid */}
-        {!screenSharing && (
-          <div className={gridClass}>
-            {/* Self tile */}
-            <div className="video-tile">
-              <video
-                ref={el => {
-                  gridVideoRef.current = el;
-                  if (el && streamRef.current && !el.srcObject) {
-                    el.srcObject = streamRef.current;
-                    el.play().catch(() => {});
-                  }
-                }}
-                autoPlay muted playsInline
-                style={{
-                  width: "100%", height: "100%", objectFit: "cover",
-                  display: videoOn ? "block" : "none",
-                }}
-              />
-              {!videoOn && <div className="video-avatar"><div className="avatar-circle">Y</div></div>}
-              <div className="video-tile-overlay">
-                <span className="video-tile-name">You {!micOn && "🔇"}</span>
-              </div>
-            </div>
-
-            {/* ✅ Remote user tiles — each manages its own <video> element
-                and receives the stream via userEntry._onStream callback */}
-            {remoteUsers.map(user => (
-              <RemoteVideoTile key={user.id} user={user} />
-            ))}
-          </div>
-        )}
-
+      <div>
+        <p>You — {micOn ? "Mic ON 🎙️" : "Mic OFF 🔇"}</p>
+        {remoteUsers.map(user => (
+          <RemoteAudioTile key={user.id} user={user} />
+        ))}
       </div>
 
-      {/* Controls */}
-      <div className="controls-bar">
-        <button
-          className={`ctrl-btn ${!micOn || micBlocked ? "muted" : ""}`}
-          onClick={toggleMic}
-        >
-          {micOn && !micBlocked ? <MicOnIcon /> : <MicOffIcon />}
-          {micBlocked ? "Blocked" : micOn ? "Mute" : "Unmute"}
+      <div>
+        <button onClick={toggleMic}>
+          {micOn ? "Mute" : "Unmute"}
         </button>
-
-        <button
-          className={`ctrl-btn ${!videoOn || camBlocked ? "muted" : ""}`}
-          onClick={toggleVideo}
-        >
-          {videoOn && !camBlocked ? <CamOnIcon /> : <CamOffIcon />}
-          {camBlocked ? "Blocked" : videoOn ? "Camera" : "Cam Off"}
-        </button>
-
-        <div className="ctrl-divider" />
-
-        <button
-          className={`ctrl-btn ${screenSharing ? "sharing" : ""}`}
-          onClick={screenSharing ? stopScreenShare : startScreenShare}
-        >
-          {screenSharing ? <StopShareIcon /> : <ScreenShareIcon />}
-          {screenSharing ? "Stop Share" : "Share"}
-        </button>
-
-        <div className="ctrl-divider" />
-
-        <button
-          className="ctrl-btn leave"
-          onClick={() => {
-            streamRef.current?.getTracks().forEach(t => t.stop());
-            window.location.href = "/";
-          }}
-        >
-          <LeaveIcon />
-          Leave
-        </button>
+        <button onClick={leaveRoom}>Leave</button>
       </div>
     </div>
   );
