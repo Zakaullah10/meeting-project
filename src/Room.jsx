@@ -207,41 +207,35 @@ export const Room = () => {
   const [musicMode, setMusicMode] = useState(false);
   const [error, setError] = useState(null);
   const [ready, setReady] = useState(false);
-  const [screenSharing, setScreenSharing] = useState(false);
 
-  const screenStreamRef = useRef(null);
   const rawStreamRef = useRef(null); // original mic+cam from browser
   const streamRef = useRef(null); // processed stream (sent to peers)
   const pipelineRef = useRef(null); // current audio pipeline
   const localVideoRef = useRef(null);
   const peersRef = useRef([]);
+  const [screenStream, setScreenStream] = useState(null);
+  const [screenSharing, setScreenSharing] = useState(false);
+  const screenStreamRef = useRef(null);
 
   const toggleScreenShare = async () => {
     try {
-      // START SCREEN SHARE
       if (!screenSharing) {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        const stream = await navigator.mediaDevices.getDisplayMedia({
           video: true,
         });
 
-        const screenTrack = screenStream.getVideoTracks()[0];
-        screenStreamRef.current = screenStream;
+        const screenTrack = stream.getVideoTracks()[0];
+        screenStreamRef.current = stream;
+        setScreenStream(stream);
 
-        // Replace video track in all peers
+        // 👉 SEND AS NEW STREAM (important change)
         peersRef.current.forEach(({ peer }) => {
-          const sender = peer._pc
-            ?.getSenders()
-            ?.find((s) => s.track?.kind === "video");
-
-          if (sender) sender.replaceTrack(screenTrack);
+          stream.getTracks().forEach((track) => {
+            peer.addTrack(track, stream);
+          });
         });
 
-        // Show screen locally
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = screenStream;
-        }
-
-        // When user stops sharing manually
+        // stop handler
         screenTrack.onended = () => {
           stopScreenShare();
         };
@@ -251,33 +245,27 @@ export const Room = () => {
         stopScreenShare();
       }
     } catch (err) {
-      console.error("Screen share error:", err);
+      console.error(err);
     }
   };
-
   const stopScreenShare = () => {
-    const cameraTrack = rawStreamRef.current?.getVideoTracks()[0];
-
-    // Replace back camera video
+    // remove tracks from peers
     peersRef.current.forEach(({ peer }) => {
-      const sender = peer._pc
-        ?.getSenders()
-        ?.find((s) => s.track?.kind === "video");
+      const senders = peer._pc?.getSenders() || [];
 
-      if (sender && cameraTrack) {
-        sender.replaceTrack(cameraTrack);
-      }
+      senders.forEach((sender) => {
+        if (sender.track && sender.track.kind === "video") {
+          if (sender.track.label.includes("screen")) {
+            sender.replaceTrack(null);
+          }
+        }
+      });
     });
 
-    // Restore local video
-    if (localVideoRef.current && rawStreamRef.current) {
-      localVideoRef.current.srcObject = rawStreamRef.current;
-    }
-
-    // Stop screen stream
     screenStreamRef.current?.getTracks().forEach((t) => t.stop());
     screenStreamRef.current = null;
 
+    setScreenStream(null);
     setScreenSharing(false);
   };
 
@@ -482,7 +470,6 @@ export const Room = () => {
       socket.off("user-left");
       pipelineRef.current?.destroy();
       rawStreamRef.current?.getTracks().forEach((t) => t.stop());
-      screenStreamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, [id, makePeer, applyAudioPipeline]);
 
@@ -595,6 +582,36 @@ export const Room = () => {
           <RemoteMediaTile key={user.id} user={user} />
         ))}
       </div>
+      {screenStream && (
+        <div
+          style={{
+            width: "100%",
+            marginBottom: "15px",
+            border: "2px solid #63b3ed",
+            borderRadius: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <video
+            autoPlay
+            playsInline
+            muted
+            ref={(video) => {
+              if (video) video.srcObject = screenStream;
+            }}
+            style={{ width: "100%", height: "400px", objectFit: "contain" }}
+          />
+          <div
+            style={{
+              padding: "5px",
+              background: "#2b6cb0",
+              textAlign: "center",
+            }}
+          >
+            📺 You are sharing screen
+          </div>
+        </div>
+      )}
 
       {ready && remoteUsers.length === 0 && (
         <p style={styles.waiting}>
@@ -628,16 +645,6 @@ export const Room = () => {
           }}
         >
           {musicMode ? "🎵 Music Mode ON" : "🎙️ Voice Mode ON"}
-        </button>
-
-        <button
-          onClick={toggleScreenShare}
-          style={{
-            ...styles.btn,
-            background: screenSharing ? "#d69e2e" : "#2b6cb0",
-          }}
-        >
-          {screenSharing ? "🛑 Stop Share" : "📺 Share Screen"}
         </button>
 
         <button
