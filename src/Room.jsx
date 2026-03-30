@@ -341,6 +341,10 @@ const PermissionModal = ({ type, onClose, onRetry }) => {
   );
 };
 
+
+const socket = io("https://meeting-project-be-production.up.railway.app", {
+  transports: ["websocket", "polling"],
+});
 // ─── Main Room Component ──────────────────────────────────────────────────────
 export const Room = () => {
   const { id } = useParams();
@@ -364,7 +368,7 @@ export const Room = () => {
 
   const peersRef = useRef([]);
   const canvasStreamRef = useRef(null);
-  const socket = useRef(null);
+  const socketRef = useRef(null);
 
   // ── Debug ─────────────────────────────────────────────────────────────────
   const [dbg, setDbg] = useState({
@@ -385,12 +389,12 @@ export const Room = () => {
   };
 
   useEffect(() => {
-  socket.current = io("https://meeting-project-be-production.up.railway.app", {
+  socketRef.current = io("http://localhost:8000", {
     transports: ["websocket"],
   });
 
   return () => {
-    socket.current.disconnect();
+    socketRef.current.disconnect();
   };
 }, []);
 
