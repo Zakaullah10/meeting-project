@@ -364,7 +364,7 @@ export const Room = () => {
 
   const peersRef = useRef([]);
   const canvasStreamRef = useRef(null);
-  const socketRef = useRef(null);
+  const socket = useRef(null);
 
   // ── Debug ─────────────────────────────────────────────────────────────────
   const [dbg, setDbg] = useState({
@@ -385,12 +385,12 @@ export const Room = () => {
   };
 
   useEffect(() => {
-  socketRef.current = io("http://localhost:8000", {
+  socket.current = io("http://localhost:8000", {
     transports: ["websocket"],
   });
 
   return () => {
-    socketRef.current.disconnect();
+    socket.current.disconnect();
   };
 }, []);
 
