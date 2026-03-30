@@ -646,7 +646,15 @@ export const Room = () => {
         >
           {musicMode ? "🎵 Music Mode ON" : "🎙️ Voice Mode ON"}
         </button>
-
+        <button
+          onClick={toggleScreenShare}
+          style={{
+            ...styles.btn,
+            background: screenSharing ? "#d69e2e" : "#2b6cb0",
+          }}
+        >
+          {screenSharing ? "🛑 Stop Share" : "📺 Share Screen"}
+        </button>
         <button
           onClick={leaveRoom}
           style={{ ...styles.btn, background: "#4a5568" }}
