@@ -1051,7 +1051,6 @@ import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useParams } from "react-router-dom";
 
-// ─── ICE Servers ──────────────────────────────────────────────────────────────
 const ICE_CONFIG = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
@@ -1069,13 +1068,13 @@ const ICE_CONFIG = {
   ],
 };
 
-// ─── Socket singleton ─────────────────────────────────────────────────────────
+// Module-level socket — ek baar banta hai
 const socket = io("https://meeting-project-be-production.up.railway.app", {
   transports: ["websocket", "polling"],
   reconnectionAttempts: 5,
 });
 
-// ─── Remote Audio tile ────────────────────────────────────────────────────────
+// ─── Remote Audio Tile ────────────────────────────────────────────────────────
 const RemoteAudioTile = React.memo(({ user }) => {
   const audioRef = useRef(null);
   const [status, setStatus] = useState("connecting");
@@ -1084,12 +1083,15 @@ const RemoteAudioTile = React.memo(({ user }) => {
     user._onStream = (remoteStream) => {
       if (audioRef.current) {
         audioRef.current.srcObject = remoteStream;
-        audioRef.current.play().catch(() => {});
+        audioRef.current.play().catch((e) => {
+          console.warn("[AUDIO] autoplay blocked:", e.message);
+        });
       }
       setStatus("connected");
     };
     user._setStatus = (s) => setStatus(s);
 
+    // Agar stream pehle aa gayi thi tile mount hone se pehle
     if (user._pendingStream) {
       user._onStream(user._pendingStream);
       user._pendingStream = null;
@@ -1103,10 +1105,14 @@ const RemoteAudioTile = React.memo(({ user }) => {
 
   return (
     <div>
-      {/* Hidden audio element — plays remote user's voice */}
       <audio ref={audioRef} autoPlay playsInline />
       <p>
-        {user.name || "User"} — {status}
+        {user.name || "User"} —{" "}
+        {status === "connecting"
+          ? "⏳ Connecting..."
+          : status === "connected"
+          ? "✅ Connected"
+          : "❌ Failed"}
       </p>
     </div>
   );
@@ -1116,26 +1122,33 @@ const RemoteAudioTile = React.memo(({ user }) => {
 export const Room = () => {
   const { id } = useParams();
 
-  const [users, setUsers]   = useState([]);
-  const [micOn, setMicOn]   = useState(false);
-  const [error, setError]   = useState(null);
+  const [users, setUsers] = useState([]);
+  const [micOn, setMicOn] = useState(false);
+  const [error, setError] = useState(null);
+  const [ready, setReady] = useState(false);
 
-  const streamRef  = useRef(null);
-  const peersRef   = useRef([]);
+  const streamRef = useRef(null);
+  const peersRef  = useRef([]); // [{ peerID, peer, userEntry }]
 
-  // ── Make a peer connection ─────────────────────────────────────────────────
+  // ── Peer banana ───────────────────────────────────────────────────────────
   const makePeer = useCallback((targetId, initiator, incomingSignal = null) => {
-    const liveStream = streamRef.current;
+    // Duplicate check
+    if (peersRef.current.find(p => p.peerID === targetId)) {
+      console.warn(`[PEER] Already exists for ${targetId}`);
+      return null;
+    }
 
+    const liveStream = streamRef.current;
     console.log(
-      `[PEER] ${initiator ? "→ Calling" : "← Answering"} ${targetId}`,
-      "tracks:", liveStream?.getTracks().map(t => `${t.kind}(${t.enabled ? "on" : "off"})`).join(", ") || "NONE"
+      `[PEER] ${initiator ? "→ INIT" : "← ANSWER"} ${targetId}`,
+      "| tracks:",
+      liveStream?.getTracks().map(t => `${t.kind}(${t.readyState})`).join(", ") || "NONE"
     );
 
     const peer = new Peer({
       initiator,
       trickle: true,
-      stream: liveStream,
+      stream: liveStream || undefined,
       config: ICE_CONFIG,
     });
 
@@ -1157,7 +1170,10 @@ export const Room = () => {
     });
 
     peer.on("stream", (remoteStream) => {
-      console.log(`[PEER] ✅ Stream from ${targetId}`);
+      console.log(
+        `[PEER] ✅ Stream from ${targetId}:`,
+        remoteStream.getTracks().map(t => `${t.kind}(${t.readyState})`)
+      );
       if (userEntry._onStream) {
         userEntry._onStream(remoteStream);
       } else {
@@ -1166,15 +1182,20 @@ export const Room = () => {
     });
 
     peer.on("connect", () => {
-      console.log(`[PEER] ✅ Connected to ${targetId}`);
+      console.log(`[PEER] ✅ Connected ${targetId}`);
       if (userEntry._setStatus) userEntry._setStatus("connected");
     });
 
-    peer.on("error", (err) => {
-      console.error(`[PEER] ❌ Error with ${targetId}:`, err.message);
+    peer.on("close", () => {
       if (userEntry._setStatus) userEntry._setStatus("failed");
     });
 
+    peer.on("error", (err) => {
+      console.error(`[PEER] ❌ ${targetId}:`, err.message);
+      if (userEntry._setStatus) userEntry._setStatus("failed");
+    });
+
+    // ✅ FIX: Answerer ko signal dena zaroori hai
     if (!initiator && incomingSignal) {
       peer.signal(incomingSignal);
     }
@@ -1182,71 +1203,83 @@ export const Room = () => {
     return { peer, userEntry };
   }, []);
 
-  // ── Main setup ─────────────────────────────────────────────────────────────
+  // ── Main init ─────────────────────────────────────────────────────────────
   useEffect(() => {
     let disposed = false;
 
     const init = async () => {
-      // 1. Get microphone only
+      // ── Step 1: PEHLE mic lo, PHIR join karo ──────────────────────────────
+      // ✅ FIX: Race condition — stream ready hone ke baad hi join karo
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        if (disposed) return;
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: false,
+        });
+        if (disposed) { stream.getTracks().forEach(t => t.stop()); return; }
 
         streamRef.current = stream;
         setMicOn(true);
-        console.log("✅ Microphone access granted");
+        console.log("✅ Mic:", stream.getAudioTracks()[0].label);
       } catch (err) {
-        console.error("🚫 Mic blocked:", err.name);
-        setError("Microphone access denied. Please allow mic and reload.");
-        // Use a silent stream so peers can still connect
-        const ac = new AudioContext();
-        const dst = ac.createMediaStreamDestination();
-        streamRef.current = dst.stream;
+        console.error("🚫 Mic error:", err.name);
+        setError(`Microphone blocked (${err.name}). Allow karo aur reload karo.`);
+        try {
+          const ac = new AudioContext();
+          const dst = ac.createMediaStreamDestination();
+          streamRef.current = dst.stream;
+        } catch {
+          streamRef.current = null;
+        }
       }
 
       if (disposed) return;
 
-      // 2. Add self to list
-      setUsers([{ id: socket.id || "self", name: "You", isSelf: true }]);
-
-      // 3. Socket events
+      // ── Step 2: Socket events ─────────────────────────────────────────────
       socket.off("all-users");
       socket.off("user-joined");
       socket.off("receiving-signal");
       socket.off("answer-signal");
       socket.off("user-left");
 
+      // Pehle se room mein hain — hum unhe call karte hain (initiator: true)
       socket.on("all-users", (ids) => {
-        console.log("👥 Existing users:", ids);
+        console.log("👥 Existing:", ids);
         ids.forEach((uid) => {
-          if (peersRef.current.find(p => p.peerID === uid)) return;
-          const { peer, userEntry } = makePeer(uid, true);
-          peersRef.current.push({ peerID: uid, peer });
-          setUsers(prev => prev.find(u => u.id === uid) ? prev : [...prev, userEntry]);
+          const result = makePeer(uid, true);
+          if (!result) return;
+          const { peer, userEntry } = result;
+          peersRef.current.push({ peerID: uid, peer, userEntry });
+          setUsers(prev => [...prev, userEntry]);
         });
       });
 
+      // ✅ FIX: user-joined pe kuch mat karo — woh "receiving-signal" bhejega
+      // Agar hum yahan bhi makePeer karein toh dono initiator ban jaate hain
       socket.on("user-joined", (uid) => {
-        console.log("➕ User joined:", uid);
-        if (peersRef.current.find(p => p.peerID === uid)) return;
-        const { peer, userEntry } = makePeer(uid, true);
-        peersRef.current.push({ peerID: uid, peer });
-        setUsers(prev => prev.find(u => u.id === uid) ? prev : [...prev, userEntry]);
+        console.log("➕ Joined (waiting for their offer):", uid);
       });
 
+      // Naya user ne offer bheja — hum answer karte hain (initiator: false)
       socket.on("receiving-signal", ({ signal, from }) => {
         console.log("📡 Offer from:", from);
         const existing = peersRef.current.find(p => p.peerID === from);
-        if (existing) { existing.peer.signal(signal); return; }
-        const { peer, userEntry } = makePeer(from, false, signal);
-        peersRef.current.push({ peerID: from, peer });
-        setUsers(prev => prev.find(u => u.id === from) ? prev : [...prev, userEntry]);
+        if (existing) {
+          existing.peer.signal(signal);
+          return;
+        }
+        const result = makePeer(from, false, signal);
+        if (!result) return;
+        const { peer, userEntry } = result;
+        peersRef.current.push({ peerID: from, peer, userEntry });
+        setUsers(prev => [...prev, userEntry]);
       });
 
+      // Hamare offer ka answer
       socket.on("answer-signal", ({ signal, from }) => {
         console.log("📩 Answer from:", from);
         const item = peersRef.current.find(p => p.peerID === from);
         if (item) item.peer.signal(signal);
+        else console.warn(`[SOCKET] No peer for answer from ${from}`);
       });
 
       socket.on("user-left", (uid) => {
@@ -1257,9 +1290,12 @@ export const Room = () => {
         setUsers(prev => prev.filter(u => u.id !== uid));
       });
 
-      // 4. Join room
+      // ── Step 3: Ab join karo ─────────────────────────────────────────────
+      setUsers([{ id: socket.id || "self", name: "You", isSelf: true }]);
+      setReady(true);
+
       const doJoin = () => {
-        console.log("🔗 join-room:", id);
+        console.log("🔗 join-room:", id, "socket:", socket.id);
         socket.emit("join-room", id);
       };
       socket.connected ? doJoin() : socket.once("connect", doJoin);
@@ -1280,21 +1316,20 @@ export const Room = () => {
     };
   }, [id, makePeer]);
 
-  // ── Toggle mic ─────────────────────────────────────────────────────────────
+  // ── Mic toggle ────────────────────────────────────────────────────────────
   const toggleMic = () => {
     const track = streamRef.current?.getAudioTracks()[0];
     if (!track) return;
-    track.enabled = !micOn;
-    setMicOn(!micOn);
+    const next = !micOn;
+    track.enabled = next;
+    setMicOn(next);
   };
 
-  // ── Leave ──────────────────────────────────────────────────────────────────
   const leaveRoom = () => {
     streamRef.current?.getTracks().forEach(t => t.stop());
     window.location.href = "/";
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   const remoteUsers = users.filter(u => !u.isSelf);
 
   return (
@@ -1304,18 +1339,20 @@ export const Room = () => {
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <div>
-        <p>You — {micOn ? "Mic ON 🎙️" : "Mic OFF 🔇"}</p>
-        {remoteUsers.map(user => (
-          <RemoteAudioTile key={user.id} user={user} />
-        ))}
-      </div>
+      <p>You — {micOn ? "🎙️ Mic ON" : "🔇 Mic OFF"}</p>
 
-      <div>
-        <button onClick={toggleMic}>
-          {micOn ? "Mute" : "Unmute"}
-        </button>
-        <button onClick={leaveRoom}>Leave</button>
+      {remoteUsers.length === 0 && ready && (
+        <p>Koi nahi aaya abhi. Link share karo!</p>
+      )}
+
+      {remoteUsers.map(user => (
+        <RemoteAudioTile key={user.id} user={user} />
+      ))}
+
+      <div style={{ marginTop: 16 }}>
+        <button onClick={toggleMic}>{micOn ? "🔇 Mute" : "🎙️ Unmute"}</button>
+        {"  "}
+        <button onClick={leaveRoom}>🚪 Leave</button>
       </div>
     </div>
   );
