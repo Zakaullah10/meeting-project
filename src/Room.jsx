@@ -385,7 +385,7 @@ export const Room = () => {
   };
 
   useEffect(() => {
-  socket.current = io("http://localhost:8000", {
+  socket.current = io("https://meeting-project-be-production.up.railway.app", {
     transports: ["websocket"],
   });
 
