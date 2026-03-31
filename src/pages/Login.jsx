@@ -122,6 +122,7 @@ export const Login = () => {
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => console.log("Login Failed")}
+              width="100%"
             />
           </div>
 
