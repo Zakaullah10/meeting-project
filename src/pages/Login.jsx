@@ -1,8 +1,9 @@
 import { GoogleLogin } from "@react-oauth/google";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
 import { useState } from "react";
+import { useGoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -119,10 +120,7 @@ export const Login = () => {
 
         {/* GOOGLE LOGIN */}
         <div className="flex justify-center">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => console.log("Login Failed")}
-          />
+          <GoogleBtn />
         </div>
 
         {/* TOGGLE */}
@@ -153,3 +151,41 @@ export const Login = () => {
     </div>
   );
 };
+
+
+
+const GoogleBtn = () => {
+  const login = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const res = await axios.post(
+          "https://meeting-project-be-production.up.railway.app/api/auth/google",
+          {
+            token: tokenResponse.access_token,
+          }
+        );
+
+        localStorage.setItem("user", JSON.stringify(res.data));
+        window.location.href = "/home";
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    onError: () => console.log("Login Failed"),
+  });
+
+  return (
+    <button
+      onClick={() => login()}
+      className="w-full flex items-center justify-center gap-2 border p-3 rounded-lg hover:bg-gray-100"
+    >
+      <img
+        src="https://developers.google.com/identity/images/g-logo.png"
+        alt="google"
+        className="w-5 h-5"
+      />
+      Continue with Google
+    </button>
+  );
+};
+
