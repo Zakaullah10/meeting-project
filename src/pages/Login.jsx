@@ -158,7 +158,7 @@ const GoogleBtn = () => {
         const res = await axios.post(
           "https://meeting-project-be-production.up.railway.app/api/auth/google",
           {
-            token: tokenResponse.access_token,
+            token: tokenResponse.credential,
           },
         );
 
