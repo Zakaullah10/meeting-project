@@ -1,4 +1,4 @@
-import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
@@ -22,13 +22,12 @@ export const Login = () => {
 
   // 🔹 Google Login
   const handleGoogleSuccess = async (credentialResponse) => {
-    console.log(credentialResponse);
     try {
       const res = await axios.post(
         "https://meeting-project-be-production.up.railway.app/api/auth/google",
         {
           token: credentialResponse.credential,
-        },
+        }
       );
 
       localStorage.setItem("user", JSON.stringify(res.data));
@@ -55,13 +54,11 @@ export const Login = () => {
       console.error(err);
     }
   };
-  const login = useGoogleLogin({
-    onSuccess: handleGoogleSuccess,
-    onError: () => console.log("Login Failed"),
-  });
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-teal-50 p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+
         {/* HEADER */}
         <div className="text-center mb-6">
           <div className="w-14 h-14 mx-auto bg-blue-500 rounded-xl flex items-center justify-center mb-3">
@@ -79,6 +76,7 @@ export const Login = () => {
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-4">
+
           {isSignup && (
             <input
               type="text"
@@ -120,18 +118,12 @@ export const Login = () => {
         <div className="my-5 text-center text-gray-400">OR</div>
 
         {/* GOOGLE LOGIN */}
-
-        <button
-          onClick={() => login()}
-          className="w-full flex items-center justify-center gap-2 border p-3 rounded-lg hover:bg-gray-100"
-        >
-          <img
-            src="https://developers.google.com/identity/images/g-logo.png"
-            alt="google"
-            className="w-5 h-5"
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => console.log("Login Failed")}
           />
-          Continue with Google
-        </button>
+        </div>
 
         {/* TOGGLE */}
         <div className="text-center mt-6">
