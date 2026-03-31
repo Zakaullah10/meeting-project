@@ -116,19 +116,23 @@ export const Login = () => {
         <div className="my-5 text-center text-gray-400">OR</div>
 
         {/* GOOGLE LOGIN */}
-        <div className="flex justify-center">
-          <div className="relative w-full">
-            <div className="absolute inset-0 opacity-0">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => console.log("Login Failed")}
-              />
-            </div>
 
-            <button className="w-full border p-3 rounded-lg">
-              Continue with Google
-            </button>
+        <div className="relative w-full">
+          <div className="absolute inset-0 opacity-0">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => console.log("Login Failed")}
+            />
           </div>
+
+          <button className="w-full flex items-center justify-center gap-2 border p-3 rounded-lg hover:bg-gray-100">
+            <img
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="google"
+              className="w-5 h-5"
+            />
+            Continue with Google
+          </button>
         </div>
 
         {/* TOGGLE */}
