@@ -1,7 +1,7 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 
@@ -150,38 +150,37 @@ export const Login = () => {
   );
 };
 
-const GoogleBtn = () => {
-   const navigate = useNavigate();
-  const login = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const res = await axios.post(
-          "https://meeting-project-be-production.up.railway.app/api/auth/google",
-          {
-            token: tokenResponse.credential,
-          },
-        );
 
-        localStorage.setItem("user", JSON.stringify(res.data));
-        navigate("/home");
-      } catch (err) {
-        console.error(err);
-      }
-    },
-    onError: () => console.log("Login Failed"),
-  });
+export const GoogleBtn = ({ handleGoogleSuccess }) => {
+  const googleBtnRef = useRef(null);
+
+  const handleClick = () => {
+    googleBtnRef.current?.click();
+  };
 
   return (
-    <button
-      onClick={() => login()}
-      className="w-full flex items-center justify-center gap-2 border p-3 rounded-lg hover:bg-gray-100"
-    >
-      <img
-        src="https://developers.google.com/identity/images/g-logo.png"
-        alt="google"
-        className="w-5 h-5"
-      />
-      Continue with Google
-    </button>
+    <div className="w-full">
+      {/* 🔹 Hidden Google Button */}
+      <div className="hidden">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => console.log("Login Failed")}
+          ref={googleBtnRef}
+        />
+      </div>
+
+      {/* 🔹 Custom Button */}
+      <button
+        onClick={handleClick}
+        className="w-full flex items-center justify-center gap-2 border p-3 rounded-lg hover:bg-gray-100"
+      >
+        <img
+          src="https://developers.google.com/identity/images/g-logo.png"
+          alt="google"
+          className="w-5 h-5"
+        />
+        Continue with Google
+      </button>
+    </div>
   );
 };
