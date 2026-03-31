@@ -1,9 +1,8 @@
 import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
-import { useRef, useState } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
+import { useState } from "react";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -118,7 +117,18 @@ export const Login = () => {
 
         {/* GOOGLE LOGIN */}
         <div className="flex justify-center">
-          <GoogleBtn />
+          <div className="relative w-full">
+            <div className="absolute inset-0 opacity-0">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => console.log("Login Failed")}
+              />
+            </div>
+
+            <button className="w-full border p-3 rounded-lg">
+              Continue with Google
+            </button>
+          </div>
         </div>
 
         {/* TOGGLE */}
@@ -146,41 +156,6 @@ export const Login = () => {
           )}
         </div>
       </div>
-    </div>
-  );
-};
-
-
-export const GoogleBtn = ({ handleGoogleSuccess }) => {
-  const googleBtnRef = useRef(null);
-
-  const handleClick = () => {
-    googleBtnRef.current?.click();
-  };
-
-  return (
-    <div className="w-full">
-      {/* 🔹 Hidden Google Button */}
-      <div className="hidden">
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={() => console.log("Login Failed")}
-          ref={googleBtnRef}
-        />
-      </div>
-
-      {/* 🔹 Custom Button */}
-      <button
-        onClick={handleClick}
-        className="w-full flex items-center justify-center gap-2 border p-3 rounded-lg hover:bg-gray-100"
-      >
-        <img
-          src="https://developers.google.com/identity/images/g-logo.png"
-          alt="google"
-          className="w-5 h-5"
-        />
-        Continue with Google
-      </button>
     </div>
   );
 };
