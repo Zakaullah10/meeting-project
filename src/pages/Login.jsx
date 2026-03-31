@@ -1,4 +1,4 @@
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
@@ -54,7 +54,10 @@ export const Login = () => {
       console.error(err);
     }
   };
-
+  const login = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => console.log("Login Failed"),
+  });
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-teal-50 p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
@@ -117,24 +120,17 @@ export const Login = () => {
 
         {/* GOOGLE LOGIN */}
 
-        <div className="relative w-full">
-          {/* <div className="absolute inset-0 opacity-0 [&>div]:w-full [&>div]:h-full"> */}
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => console.log("Login Failed")}
-              width="100%"
-            />
-          {/* </div> */}
-{/* 
-          <button className="w-full flex items-center justify-center gap-2 border p-3 rounded-lg hover:bg-gray-100">
-            <img
-              src="https://developers.google.com/identity/images/g-logo.png"
-              alt="google"
-              className="w-5 h-5"
-            />
-            Continue with Google
-          </button> */}
-        </div>
+        <button
+          onClick={() => login()}
+          className="w-full flex items-center justify-center gap-2 border p-3 rounded-lg hover:bg-gray-100"
+        >
+          <img
+            src="https://developers.google.com/identity/images/g-logo.png"
+            alt="google"
+            className="w-5 h-5"
+          />
+          Continue with Google
+        </button>
 
         {/* TOGGLE */}
         <div className="text-center mt-6">
