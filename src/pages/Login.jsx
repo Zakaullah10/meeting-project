@@ -31,7 +31,7 @@ export const Login = () => {
       );
 
       localStorage.setItem("user", JSON.stringify(res.data));
-      navigate("/home");
+      navigate("/");
     } catch (err) {
       console.error(err);
     }
@@ -49,7 +49,7 @@ export const Login = () => {
       const res = await axios.post(url, form);
 
       localStorage.setItem("user", JSON.stringify(res.data));
-      navigate("/home");
+      navigate("/");
     } catch (err) {
       console.error(err);
     }
