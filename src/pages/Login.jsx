@@ -28,7 +28,7 @@ export const Login = () => {
         "https://meeting-project-be-production.up.railway.app/api/auth/google",
         {
           token: credentialResponse.credential,
-        }
+        },
       );
 
       localStorage.setItem("user", JSON.stringify(res.data));
@@ -59,7 +59,6 @@ export const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-teal-50 p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-
         {/* HEADER */}
         <div className="text-center mb-6">
           <div className="w-14 h-14 mx-auto bg-blue-500 rounded-xl flex items-center justify-center mb-3">
@@ -77,7 +76,6 @@ export const Login = () => {
 
         {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {isSignup && (
             <input
               type="text"
@@ -152,9 +150,8 @@ export const Login = () => {
   );
 };
 
-
-
 const GoogleBtn = () => {
+   const navigate = useNavigate();
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
@@ -162,11 +159,11 @@ const GoogleBtn = () => {
           "https://meeting-project-be-production.up.railway.app/api/auth/google",
           {
             token: tokenResponse.access_token,
-          }
+          },
         );
 
         localStorage.setItem("user", JSON.stringify(res.data));
-        window.location.href = "/home";
+        navigate("/home");
       } catch (err) {
         console.error(err);
       }
@@ -188,4 +185,3 @@ const GoogleBtn = () => {
     </button>
   );
 };
-
