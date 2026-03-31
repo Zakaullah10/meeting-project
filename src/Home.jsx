@@ -10,7 +10,7 @@ export const Home = () => {
     setLoading(true);
     setTimeout(() => {
       const id = uuidV4();
-      window.loatcion.href = `/room/${id}`;
+      window.location.href = `/room/${id}`;
     }, 500);
   };
 
