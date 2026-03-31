@@ -118,14 +118,14 @@ export const Login = () => {
         {/* GOOGLE LOGIN */}
 
         <div className="relative w-full">
-          <div className="absolute inset-0 opacity-0 [&>div]:w-full [&>div]:h-full">
+          {/* <div className="absolute inset-0 opacity-0 [&>div]:w-full [&>div]:h-full"> */}
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => console.log("Login Failed")}
               width="100%"
             />
-          </div>
-
+          {/* </div> */}
+{/* 
           <button className="w-full flex items-center justify-center gap-2 border p-3 rounded-lg hover:bg-gray-100">
             <img
               src="https://developers.google.com/identity/images/g-logo.png"
@@ -133,7 +133,7 @@ export const Login = () => {
               className="w-5 h-5"
             />
             Continue with Google
-          </button>
+          </button> */}
         </div>
 
         {/* TOGGLE */}
