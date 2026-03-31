@@ -118,11 +118,12 @@ export const Login = () => {
         {/* GOOGLE LOGIN */}
 
         <div className="relative w-full">
-          <div className="absolute inset-0 opacity-0 [&>div]:w-full [&>div]:h-full">
+          <div className="absolute inset-0 opacity-0 [&>div]:w-full [&>div]:h-full m-0">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => console.log("Login Failed")}
               width="370"
+              
             />
           </div>
 
