@@ -118,10 +118,11 @@ export const Login = () => {
         <div className="my-5 text-center text-gray-400">OR</div>
 
         {/* GOOGLE LOGIN */}
-        <div className="flex justify-center">
+        <div className="flex justify-center w-full">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => console.log("Login Failed")}
+               width="300"
           />
         </div>
 
