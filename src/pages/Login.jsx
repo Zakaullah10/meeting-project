@@ -22,6 +22,7 @@ export const Login = () => {
 
   // 🔹 Google Login
   const handleGoogleSuccess = async (credentialResponse) => {
+    console.log(credentialResponse);
     try {
       const res = await axios.post(
         "https://meeting-project-be-production.up.railway.app/api/auth/google",
